@@ -17,6 +17,8 @@ class _MyHomeState extends State<MyHome> {
   TextEditingController controller = TextEditingController();
   late Timer timer;
 
+  List<String> messages = [];
+
   @override
   void dispose() {
     timer.cancel();
@@ -42,17 +44,28 @@ class _MyHomeState extends State<MyHome> {
             },
             child: const Text("Activar Health"),
           ),
+          ...messages.map((e) => Text(e)),
         ],
       ),
     );
   }
 
   void fetchData(String _url) async {
-    final response = await http.get(Uri.parse(_url));
-    if (response.statusCode == 200) {
-      // Manejar la respuesta exitosa aquí
-    } else {
-      // Manejar cualquier error aquí
-    }
+    final response = await http
+        .get(
+      Uri.parse(_url),
+    )
+        .timeout(
+      const Duration(seconds: 1),
+      onTimeout: () {
+        // Time has run out, do what you wanted to do.
+        return http.Response(
+            'Error', 408); // Request Timeout response status code
+      },
+    );
+    // Manejar la respuesta exitosa aquí
+    setState(() {
+      messages.add("Systema Healht ${response.statusCode}");
+    });
   }
 }
